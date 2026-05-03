@@ -1,0 +1,343 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+void main() => runApp(const DanteDevilApp());
+
+class DanteDevilApp extends StatelessWidget {
+  const DanteDevilApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'الشيطان دانتي',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF000000),
+      ),
+      home: const HomeScreen(),
+    );
+  }
+}
+
+class Anime {
+  final String name;
+  final String quote;
+  final int totalEpisodes;
+  final String movie;
+  final Color themeColor;
+  bool isFavorite;
+
+  Anime(this.name, this.quote, this.totalEpisodes, this.movie, this.themeColor,
+      {this.isFavorite = false});
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // --- القاعدة الذهبية: الألوان + العبارات + الحلقات ---
+  final List<Anime> _allAnimes = [
+    // شونين وأساطير
+    Anime("One Piece", "“I'm going to be the King of the Pirates!”", 1110,
+        "Movie: Red", Colors.yellow),
+    Anime("Naruto Shippuden", "“I never back down on my word!”", 500,
+        "Road to Ninja", Colors.orange),
+    Anime("Bleach", "“If I don't wield the sword, I can't protect you.”", 366,
+        "Hell Verse", Colors.orangeAccent),
+    Anime("Dragon Ball Super", "“I will not let you destroy my world!”", 131,
+        "Super Hero", Colors.amber),
+    Anime("Hunter x Hunter", "“Enjoy the little detours!”", 148,
+        "The Last Mission", Colors.greenAccent),
+    Anime("Jujutsu Kaisen", "“I Alone Am The Honored One”", 47, "JJK 0",
+        Colors.deepPurple),
+    Anime("Attack on Titan", "“If you don't fight, you can't win!”", 87,
+        "Final Chapters", Colors.red),
+    Anime("Fullmetal Alchemist", "“A lesson without pain is meaningless.”", 64,
+        "Sacred Star", Colors.red.shade900),
+    Anime("Vinland Saga", "“I have no enemies.”", 48, "Special Episode",
+        Colors.brown),
+    Anime("Solo Leveling", "“Arise.”", 12, "ReAwakening", Colors.blueAccent),
+    Anime("Chainsaw Man", "“I'll become a Chainsaw!”", 12, "Reze Arc",
+        Colors.deepOrange),
+    Anime("Black Clover", "“My magic is never giving up!”", 170,
+        "Wizard King", Colors.green),
+    Anime("One Punch Man", "“I'm a hero for fun”", 24, "Road to Hero",
+        Colors.redAccent),
+    Anime("Mob Psycho 100", "“Master, I've reached 100%.”", 37,
+        "Reigen Special", Colors.lightGreenAccent),
+    Anime("Tokyo Ghoul", "“What's 1000 minus 7?”", 48, "Movie: Jack",
+        Colors.redAccent.shade700),
+    Anime("Death Note", "“I'll become the God of this new world”", 37,
+        "Relight", Colors.blueGrey),
+    Anime("Shadow Garden", "“I am Atomic”", 20, "Lost Echoes",
+        Colors.purpleAccent),
+
+    // رومانسية وحب
+    Anime("Kaguya-sama", "“Love is War! First to confess loses.”", 37,
+        "First Kiss", Colors.redAccent),
+    Anime("Your Lie in April", "“A spring without you is coming.”", 22,
+        "OAD Special", const Color(0xFFFFB6C1)),
+    Anime("Horimiya", "“The distance between us is zero.”", 13,
+        "Missing Pieces", Colors.lightBlueAccent),
+    Anime("My Dress-Up Darling", "“I want to be a Cosplay God!”", 12,
+        "Special Event", const Color(0xFFFF80AB)),
+    Anime("Fruits Basket", "“Keep your memories close.”", 63, "Prelude Movie",
+        Colors.orange.shade300),
+  ];
+
+  List<Anime> _filteredAnimes = [];
+  final Set<String> _watchedEpisodes = {};
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredAnimes = _allAnimes;
+  }
+
+  void _search(String query) {
+    setState(() {
+      _filteredAnimes = _allAnimes
+          .where((Anime a) => a.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  void _pickRandom() {
+    final Anime randomAnime = _allAnimes[Random().nextInt(_allAnimes.length)];
+    _openDetails(randomAnime);
+  }
+
+  void _openDetails(Anime anime) {
+    Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+            builder: (BuildContext context) => DetailsScreen(
+                  anime: anime,
+                  watchedEpisodes: _watchedEpisodes,
+                  onWatched: (String epKey) => setState(() => _watchedEpisodes.add(epKey)),
+                )));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("الشيطان دانتي",
+            style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 3)),
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+              icon: const Icon(Icons.casino, color: Colors.redAccent),
+              onPressed: _pickRandom),
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF1A0000), Colors.black]),
+        ),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _search,
+                decoration: InputDecoration(
+                  hintText: "ابحث في إمبراطورية دانتي...",
+                  prefixIcon: const Icon(Icons.search, color: Colors.redAccent),
+                  filled: true,
+                  fillColor: Colors.white10,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none),
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filteredAnimes.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final Anime anime = _filteredAnimes[index];
+                  return Container(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(colors: [
+                        anime.themeColor.withOpacity(0.4),
+                        Colors.black
+                      ]),
+                      border: Border.all(color: anime.themeColor.withOpacity(0.3)),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(15),
+                      title: Text(anime.name,
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      subtitle: Text(anime.quote,
+                          style: const TextStyle(
+                              fontSize: 10,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.white70)),
+                      leading: IconButton(
+                        icon: Icon(
+                            anime.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: anime.isFavorite ? Colors.red : Colors.white24),
+                        onPressed: () =>
+                            setState(() => anime.isFavorite = !anime.isFavorite),
+                      ),
+                      trailing: Icon(Icons.play_circle_outline, color: anime.themeColor),
+                      onTap: () => _openDetails(anime),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DetailsScreen extends StatelessWidget {
+  final Anime anime;
+  final Set<String> watchedEpisodes;
+  final Function(String) onWatched;
+
+  const DetailsScreen({
+    super.key,
+    required this.anime,
+    required this.watchedEpisodes,
+    required this.onWatched,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(anime.name),
+          backgroundColor: Colors.black,
+          bottom: TabBar(
+            indicatorColor: anime.themeColor,
+            tabs: const <Widget>[Tab(text: "الحلقات"), Tab(text: "الأفلام")],
+          ),
+        ),
+        body: TabBarView(
+          children: <Widget>[
+            // Episodes Tab
+            ListView.builder(
+              itemCount: anime.totalEpisodes,
+              itemBuilder: (BuildContext context, int i) {
+                final String episodeKey = "${anime.name}-episode-${i + 1}";
+                final bool isWatched = watchedEpisodes.contains(episodeKey);
+                return ListTile(
+                  leading: Icon(isWatched ? Icons.check_circle : Icons.play_arrow,
+                      color: isWatched ? Colors.green : anime.themeColor),
+                  title: Text("Episode ${i + 1}",
+                      style: TextStyle(
+                          color: isWatched ? Colors.white38 : Colors.white)),
+                  onTap: () {
+                    onWatched(episodeKey);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                            builder: (BuildContext context) => PrivatePlayer(
+                                title: "${anime.name} - Episode ${i + 1}",
+                                color: anime.themeColor)));
+                  },
+                );
+              },
+            ),
+            // Movies Tab
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.movie_filter, size: 100, color: anime.themeColor),
+                  const SizedBox(height: 20),
+                  Text(anime.movie,
+                      style:
+                          const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: anime.themeColor),
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                            builder: (BuildContext context) => PrivatePlayer(
+                                title: anime.movie, color: anime.themeColor))),
+                    child: const Text("مشاهدة الآن",
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PrivatePlayer extends StatelessWidget {
+  final String title;
+  final Color color;
+  const PrivatePlayer({super.key, required this.title, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(title: Text(title), backgroundColor: Colors.black),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              height: 240,
+              margin: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: color, width: 2)),
+              child: Icon(Icons.play_circle_fill, size: 100, color: color),
+            ),
+            const SizedBox(height: 20),
+            CircularProgressIndicator(color: color),
+            const SizedBox(height: 25),
+            const Text("بث آمن من سيرفرات الشيطان دانتي...",
+                style: TextStyle(color: Colors.white70)),
+            const Text("مشاهدة داخلية 100% - لا خروج للمتصفح",
+                style: TextStyle(fontSize: 10, color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
+}
